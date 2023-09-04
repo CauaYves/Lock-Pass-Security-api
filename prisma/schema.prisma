@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  email      String       @unique
+  password   String
+  session    Session[]
+  credential Credential[]
+  note       Note[]
+  card       Card[]
+
+  @@map("users")
+}
+
+model Session {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  token  String
+
+  @@map("session")
+}
+
+model Credential {
+  id       Int    @id @default(autoincrement())
+  title    String
+  site     String
+  username String
+  password String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+
+  @@unique([title, userId])
+  @@map("credential")
+}
+
+model Note {
+  id     Int    @id @default(autoincrement())
+  title  String @unique
+  note   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@unique([userId, title])
+  @@map("note")
+}
+
+model Card {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  title      String
+  cardNumber String
+  name       String
+  expiry     DateTime
+  cvc        String
+  password   String
+  virtual    Boolean
+  type       String
+
+  @@unique([userId, title])
+  @@map("card")
+}
